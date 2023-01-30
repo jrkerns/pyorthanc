@@ -34,8 +34,7 @@ class Orthanc(httpx.Client):
         if username and password:
             self.setup_credentials(username, password)
 
-        if headers is not None:
-            self.headers = headers
+        self.headers = headers
 
     def setup_credentials(self, username: str, password: str) -> None:
         """Set credentials needed for HTTP requests"""
@@ -44,7 +43,6 @@ class Orthanc(httpx.Client):
     def _get(self,
              route: str,
              params: Optional[QueryParamTypes] = None,
-             headers: Optional[HeaderTypes] = None,
              cookies: Optional[CookieTypes] = None) -> Union[Dict, List, str, bytes, int]:
         """GET request with specified route
 
@@ -54,8 +52,6 @@ class Orthanc(httpx.Client):
             HTTP route.
         params
             Parameters for the HTTP request.
-        headers
-            Headers for the HTTP request.
         cookies
 
         Returns
@@ -63,7 +59,7 @@ class Orthanc(httpx.Client):
         Union[Dict, List, str, bytes, int]
             Serialized response of the HTTP GET request.
         """
-        response = self.get(url=route, params=params, headers=headers, cookies=cookies)
+        response = self.get(url=route, params=params, headers=self.headers, cookies=cookies)
 
         if 200 <= response.status_code < 300:
             if 'application/json' in response.headers['content-type']:
@@ -78,7 +74,6 @@ class Orthanc(httpx.Client):
     def _delete(self,
                 route: str,
                 params: Optional[QueryParamTypes] = None,
-                headers: Optional[HeaderTypes] = None,
                 cookies: Optional[CookieTypes] = None) -> None:
         """DELETE to specified route
 
@@ -97,7 +92,7 @@ class Orthanc(httpx.Client):
         None
             If the HTTP DELETE request fails, HTTPError is raised.
         """
-        response = self.delete(route, params=params, headers=headers, cookies=cookies)
+        response = self.delete(route, params=params, headers=self.headers, cookies=cookies)
 
         if 200 <= response.status_code < 300:
             return
@@ -111,7 +106,6 @@ class Orthanc(httpx.Client):
               files: Optional[RequestFiles] = None,
               json: Optional[Any] = None,
               params: Optional[QueryParamTypes] = None,
-              headers: Optional[HeaderTypes] = None,
               cookies: Optional[CookieTypes] = None) -> Union[Dict, List, str, bytes, int]:
         """POST to specified route
 
@@ -133,7 +127,7 @@ class Orthanc(httpx.Client):
         Union[Dict, List, str, bytes, int]
             Serialized response of the HTTP POST request.
         """
-        response = self.post(route, content=content, data=data, files=files, json=json, params=params, headers=headers, cookies=cookies)
+        response = self.post(route, content=content, data=data, files=files, json=json, params=params, headers=self.headers, cookies=cookies)
 
         if 200 <= response.status_code < 300:
             if 'application/json' in response.headers['content-type']:
@@ -152,7 +146,6 @@ class Orthanc(httpx.Client):
              files: Optional[RequestFiles] = None,
              json: Optional[Any] = None,
              params: Optional[QueryParamTypes] = None,
-             headers: Optional[HeaderTypes] = None,
              cookies: Optional[CookieTypes] = None) -> None:
         """PUT to specified route
 
@@ -174,7 +167,7 @@ class Orthanc(httpx.Client):
         None
             If the HTTP PUT request fails, HTTPError is raised.
         """
-        response = self.put(route, content=content, data=data, files=files, json=json, params=params, headers=headers, cookies=cookies)
+        response = self.put(route, content=content, data=data, files=files, json=json, params=params, headers=self.headers, cookies=cookies)
 
         if 200 <= response.status_code < 300:
             return
