@@ -32,7 +32,8 @@ def find(orthanc_url: str,
          async_mode: bool = False,
          patient_filter: Optional[Callable] = None,
          study_filter: Optional[Callable] = None,
-         series_filter: Optional[Callable] = None) -> List[Patient]:
+         series_filter: Optional[Callable] = None,
+         headers: Optional[dict] = None) -> List[Patient]:
     """Find desired patients/Study/Series/Instance in an Orthanc server
 
     This function builds a series of tree structure.
@@ -62,9 +63,9 @@ def find(orthanc_url: str,
     """
     if async_mode:
         if auth:
-            orthanc = AsyncOrthanc(url=orthanc_url, username=auth[0], password=auth[1])
+            orthanc = AsyncOrthanc(url=orthanc_url, username=auth[0], password=auth[1], headers=headers)
         else:
-            orthanc = AsyncOrthanc(url=orthanc_url)
+            orthanc = AsyncOrthanc(url=orthanc_url, headers=headers)
 
         patients = asyncio.run(
             _async_find(
@@ -78,9 +79,9 @@ def find(orthanc_url: str,
         return trim_patient(patients)
 
     if auth:
-        orthanc = Orthanc(url=orthanc_url, username=auth[0], password=auth[1])
+        orthanc = Orthanc(url=orthanc_url, username=auth[0], password=auth[1], headers=headers)
     else:
-        orthanc = Orthanc(url=orthanc_url)
+        orthanc = Orthanc(url=orthanc_url, headers=headers)
 
     patient_identifiers = orthanc.get_patients()
     patients = []
