@@ -40,9 +40,19 @@ class Orthanc(httpx.Client):
         """Set credentials needed for HTTP requests"""
         self._auth = httpx.BasicAuth(username, password)
 
+    def join_headers(self, addl_headers: Optional[dict]) -> dict:
+        """Join any passed headers to the existing instance headers"""
+        new_headers = {}
+        if self.headers is not None:
+            new_headers |= self.headers
+        if addl_headers is not None:
+            new_headers |= addl_headers
+        return new_headers
+
     def _get(self,
              route: str,
              params: Optional[QueryParamTypes] = None,
+             headers: Optional[HeaderTypes] = None,
              cookies: Optional[CookieTypes] = None) -> Union[Dict, List, str, bytes, int]:
         """GET request with specified route
 
@@ -59,7 +69,7 @@ class Orthanc(httpx.Client):
         Union[Dict, List, str, bytes, int]
             Serialized response of the HTTP GET request.
         """
-        response = self.get(url=route, params=params, headers=self.headers, cookies=cookies)
+        response = self.get(url=route, params=params, headers=self.join_headers(headers), cookies=cookies)
 
         if 200 <= response.status_code < 300:
             if 'application/json' in response.headers['content-type']:
@@ -74,6 +84,7 @@ class Orthanc(httpx.Client):
     def _delete(self,
                 route: str,
                 params: Optional[QueryParamTypes] = None,
+                headers: Optional[HeaderTypes] = None,
                 cookies: Optional[CookieTypes] = None) -> None:
         """DELETE to specified route
 
@@ -92,7 +103,7 @@ class Orthanc(httpx.Client):
         None
             If the HTTP DELETE request fails, HTTPError is raised.
         """
-        response = self.delete(route, params=params, headers=self.headers, cookies=cookies)
+        response = self.delete(route, params=params, headers=self.join_headers(headers), cookies=cookies)
 
         if 200 <= response.status_code < 300:
             return
@@ -106,6 +117,7 @@ class Orthanc(httpx.Client):
               files: Optional[RequestFiles] = None,
               json: Optional[Any] = None,
               params: Optional[QueryParamTypes] = None,
+              headers: Optional[HeaderTypes] = None,
               cookies: Optional[CookieTypes] = None) -> Union[Dict, List, str, bytes, int]:
         """POST to specified route
 
@@ -127,7 +139,7 @@ class Orthanc(httpx.Client):
         Union[Dict, List, str, bytes, int]
             Serialized response of the HTTP POST request.
         """
-        response = self.post(route, content=content, data=data, files=files, json=json, params=params, headers=self.headers, cookies=cookies)
+        response = self.post(route, content=content, data=data, files=files, json=json, params=params, headers=self.join_headers(headers), cookies=cookies)
 
         if 200 <= response.status_code < 300:
             if 'application/json' in response.headers['content-type']:
@@ -146,6 +158,7 @@ class Orthanc(httpx.Client):
              files: Optional[RequestFiles] = None,
              json: Optional[Any] = None,
              params: Optional[QueryParamTypes] = None,
+             headers: Optional[HeaderTypes] = None,
              cookies: Optional[CookieTypes] = None) -> None:
         """PUT to specified route
 
@@ -167,7 +180,7 @@ class Orthanc(httpx.Client):
         None
             If the HTTP PUT request fails, HTTPError is raised.
         """
-        response = self.put(route, content=content, data=data, files=files, json=json, params=params, headers=self.headers, cookies=cookies)
+        response = self.put(route, content=content, data=data, files=files, json=json, params=params, headers=self.join_headers(headers), cookies=cookies)
 
         if 200 <= response.status_code < 300:
             return
@@ -461,7 +474,7 @@ class Orthanc(httpx.Client):
         headers
             Dictionary of optional headers:
             "If-Match" (str): Revision of the attachment, to check if its content has not changed and can be deleted. This header is mandatory if `CheckRevisions` option is `true`.
-            
+
 
         Returns
         -------
@@ -492,7 +505,7 @@ class Orthanc(httpx.Client):
         headers
             Dictionary of optional headers:
             "If-None-Match" (str): Optional revision of the attachment, to check if its content has changed
-            
+
 
         Returns
         -------
